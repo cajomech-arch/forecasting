@@ -25,20 +25,16 @@ plot(ny_ts,
 #stationarity: check with a ADF test for stationarity
 
 adf.test(ny_ts, k = 12) #K is 1 year (12 months) from now
-
-# if it is not stationary, let's perform a first diff.
-
-ny_ts_d1 <- diff(ny_ts, differences = 1)
-adf.test(ny_ts_d1, k=12)
-
-autoplot(ny_ts_d1)
+  #the ADF test shows the data is stationary (p value < 0.05)
 
 #ACF and PACF functions
 
-pacf(ny_ts_d1) #AR order p = 1
-acf(ny_ts_d1) #MA order q = 1
+pacf(ny_ts) #AR order p = 1
+acf(ny_ts) #MA order q = 1
 
-tsMod <- Arima(y = ny_ts, order = c(1,1,1)) #tsMod is the ARIMA(1,1,1) model
+# create the SARIMA model
+
+tsMod <- Arima(ny_ts, order = c(1,1,1), seasonal = c(0,1,1))
 
 print(tsMod)
 
