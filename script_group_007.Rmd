@@ -1,0 +1,30 @@
+---
+Title: "Forecasting Mean Monthly Temperature in New York"
+Authors: "Pratul Paudel, Camillo Echeverria, Varsenik Hakobyan, Mariam Abolade Bisiriyu"
+Date: "`r Sys.Date()`"
+Output: html_document
+---
+
+# Introduction
+We have chosen the mean monthly temperature 
+data for New York because the data has visible 
+seasonal patterns, long historical record, 
+and reliability, making it our preferred data for our 
+forecasting analysis. This dataset enables examination of key time 
+series characteristics such as trend, seasonality, and autocorrelation. 
+Beyond its climatic importance, temperature forecasting also holds economic relevance, 
+as temperature variations significantly influence energy demand, 
+transportation, and urban planning. 
+Therefore, we believe that analyzing and predicting temperature patterns supports 
+the evaluation of different forecasting models 
+but also provides insights with practical and economic implications, 
+making it academically and contextually valuable for forecasting research.
+
+```{r setup, include=FALSE}
+# Load necessary libraries
+knitr::opts_chunk$set(echo = TRUE)
+library(fpp3)
+library(forecast)
+library(tseries)
+library(urca)
+library(kableExtra)
