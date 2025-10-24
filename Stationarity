@@ -12,14 +12,3 @@ summary(ur.df(na.omit(difference(US_City_Temp_Data$new_york,12)),
 #This test of ny_diff has test_statistic output of -4.648 < -1.95 (5 pct) therefore
 #Accept null hypothesis. Data is stationary
 
-
-summary(ur.df(na.omit(difference(US_City_Temp_Data$new_york,12)),
-              type='none', lags=20))
-
-
-US_City_Temp_Data <- US_City_Temp_Data %>% 
-  mutate(diff12_y = difference(new_york, 12),
-         diff_y = difference(diff12_y))
-
-summary(ur.df(na.omit(US_City_Temp_Data$diff_y),
-              type='none', lags=20))
