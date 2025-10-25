@@ -10,5 +10,5 @@ autoplot(ny_diff)
 summary(ur.df(na.omit(difference(US_City_Temp_Data$new_york,12)),
               type='none', lags=20))
 #This test of ny_diff has test_statistic output of -4.648 < -1.95 (5 pct) therefore
-#Accept null hypothesis. Data is stationary
+#Reject null hypothesis. Data is stationary
 
