@@ -1,0 +1,161 @@
+# Import Libraries and data
+
+library(fpp3)
+library(forecast)
+library(tseries)
+library(urca)
+library(feasts)
+install.packages("knitr")
+library(knitr)
+
+
+## Convert time column to Date format and filter from 1990 onward
+US_City_Temp_Data$time <- as.Date(US_City_Temp_Data$time)
+US_City_Temp_Data <- US_City_Temp_Data[US_City_Temp_Data$time >= as.Date("1990-01-01"), ]
+
+## Extract New York temperature data
+ny_temp <- US_City_Temp_Data$new_york
+
+## Create time series object
+## Monthly data from January 1990 to December 2022
+ny_ts <- ts(ny_temp, 
+            start = c(1990, 1), 
+            frequency = 12)
+
+## Plot the time series
+plot(ny_ts, 
+     main = "Monthly Average Temperature - New York",
+     xlab = "Year", 
+     ylab = "Temperature")
+
+# Stationarity: check with a UR test for stationarity
+
+```{r stationarity, echo=FALSE, eval=FALSE, message=FALSE, warning=FALSE}
+summary(ur.df(US_City_Temp_Data$new_york,
+              type='none', lags=20))
+#Since its not stationary apply first difference
+
+ny_diff <- diff(ny_ts,lag =12)
+
+autoplot(ny_diff)
+
+summary(ur.df(na.omit(difference(US_City_Temp_Data$new_york,12)),
+              type='none', lags=20))
+#This test of ny_diff has test_statistic output of -4.648 < -1.95 (5 pct) therefore
+#Reject null hypothesis. Data is stationary
+
+
+``` 
+
+# ACF and PACF plot - Identify model
+
+The third step is identify the SARIMA model orders through the assessment of the ACF and PACF.
+
+```{r acf_pacf, echo=TRUE, message=FALSE, warning=FALSE}
+# Seasonal + first differencing
+ny_ts_diff <- diff(diff(ny_ts, lag = 12))
+
+# Plot ACF and PACF
+par(mfrow = c(1, 2))  # show both plots side by side
+acf(ny_ts_diff, main = "ACF of Differenced Series")
+pacf(ny_ts_diff, main = "PACF of Differenced Series")
+par(mfrow = c(1, 1))  # reset layout
+
+```
+
+# create the SARIMA model
+
+tsMod <- Arima(ny_ts, order = c(1,0,1), seasonal = c(1,1,1))
+
+print(tsMod)
+
+forecast(tsMod, h = 12)
+autoplot(forecast(tsMod, h = 12))
+
+ny_df <- as_tsibble(ny_ts) 
+# if this doesn't work, do this instead:
+# ny_df <- tsibble(value = as.numeric(ny_ts), index = yearmonth(seq(from = as.Date("1990-01-01"), by = "month", length.out = length(ny_ts))))
+
+# Fit and compare multiple ARIMA models
+
+```{r estimation, echo=FALSE, message=FALSE, warning=FALSE}
+ny_models <- ny_df %>% 
+  model(
+    arima111011 = ARIMA(value ~ pdq(1,1,1) + PDQ(0,1,1)),
+    arima101111 = ARIMA(value ~ pdq(1,0,1) + PDQ(1,1,1)),
+    arima111111 = ARIMA(value ~ pdq(1,1,1) + PDQ(1,1,1)),
+    arima211111 = ARIMA(value ~ pdq(2,1,1) + PDQ(1,1,1)),
+    auto = ARIMA(value)
+  ) %>%
+  glance() %>%
+  select(Model = .model, AICc, AIC, BIC)
+  print(ny_models)
+```
+
+
+```{r residuals, echo=FALSE, message=FALSE, warning=FALSE}
+ny_fit <- ny_df %>%
+  model(
+    arima111011 = ARIMA(value ~ pdq(1,1,1) + PDQ(0,1,1)),
+    arima101111 = ARIMA(value ~ pdq(1,0,1) + PDQ(1,1,1)),
+    arima111111 = ARIMA(value ~ pdq(1,1,1) + PDQ(1,1,1)),
+    arima211111 = ARIMA(value ~ pdq(2,1,1) + PDQ(1,1,1)),
+    auto = ARIMA(value)
+  )
+
+ny_fit %>%
+  select(arima111011) %>%
+  gg_tsresiduals()
+```
+
+
+
+```{r residuals_test, echo=FALSE, message=FALSE, warning=FALSE}
+res1 <- augment(ny_fit) %>% 
+  filter(.model == 'arima111011') %>% 
+  features(.innov, ljung_box, lag = 11, dof = 1)
+
+res2 <- augment(ny_fit) %>% 
+  filter(.model == 'arima101111') %>% 
+  features(.innov, ljung_box, lag = 12, dof = 1)
+
+res3 <- augment(ny_fit) %>% 
+  filter(.model == 'arima111111') %>% 
+  features(.innov, ljung_box, lag = 11, dof = 4)
+
+res4 <- augment(ny_fit) %>% 
+  filter(.model == 'arima211111') %>% 
+  features(.innov, ljung_box, lag = 11, dof = 5)
+
+bind_rows(res1, res2, res3, res4)
+```
+
+# Check accuracy measures
+
+We will check the accuracy measures and select a model:
+
+```{r forecast, echo=FALSE, message=FALSE, warning=FALSE}
+
+ny_fit %>%
+  forecast(h = 7) %>% 
+  accuracy(ny_df) %>%
+  kable()
+```
+
+Then, we plot it!
+
+```{r forecastplot, message=FALSE, warning=FALSE}
+
+ny_fit %>%
+  forecast(h = 12) %>% 
+  accuracy(ny_df) %>%
+  kable()
+
+ny_fit %>%
+  forecast(h = 12) %>% 
+  filter(.model == 'arima111011') %>% 
+  autoplot(ny_df) 
+
+```
+
+
