@@ -45,10 +45,22 @@ summary(ur.df(na.omit(difference(US_City_Temp_Data$new_york,12)),
 
 ``` 
 
-#ACF and PACF functions
+# ACF and PACF plot - Identify model
 
-pacf(ny_ts) #AR order p = 1
-acf(ny_ts) #MA order q = 1
+The third step is identify the SARIMA model orders through the assessment of the ACF and PACF. 
+
+
+```{r acf_pacf, echo=TRUE, message=FALSE, warning=FALSE}
+# Seasonal + first differencing
+ny_ts_diff <- diff(diff(ny_ts, lag = 12))
+
+# Plot ACF and PACF
+par(mfrow = c(1, 2))  # show both plots side by side
+acf(ny_ts_diff, main = "ACF of Differenced Series")
+pacf(ny_ts_diff, main = "PACF of Differenced Series")
+par(mfrow = c(1, 1))  # reset layout
+
+```
 
 # create the SARIMA model
 
