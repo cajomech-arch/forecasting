@@ -27,10 +27,23 @@ plot(ny_ts,
      xlab = "Year", 
      ylab = "Temperature")
 
-#stationarity: check with a ADF test for stationarity
+# Stationarity: check with a UR test for stationarity
 
-adf.test(ny_ts, k = 12) #K is 1 year (12 months) from now
-#the ADF test shows the data is stationary (p value < 0.05)
+```{r stationarity, echo=FALSE, eval=FALSE, message=FALSE, warning=FALSE}
+summary(ur.df(US_City_Temp_Data$new_york,
+              type='none', lags=20))
+#Since its not stationary apply first difference
+
+ny_diff <- diff(ny_ts,lag =12)
+
+autoplot(ny_diff)
+
+summary(ur.df(na.omit(difference(US_City_Temp_Data$new_york,12)),
+              type='none', lags=20))
+#This test of ny_diff has test_statistic output of -4.648 < -1.95 (5 pct) therefore
+# reject null hypothesis
+
+``` 
 
 #ACF and PACF functions
 
