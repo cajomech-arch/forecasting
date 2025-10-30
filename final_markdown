@@ -83,8 +83,8 @@ Accept null hypothesis. Original data set is NOT stationary.
 
 We apply the first difference and store it as a new time series (ny_diff)
 
-This test of the differentiated time series (ny_diff) has test_statistic output of -4.648 < -1.95 (5 pct) critical value. Therefore:
-Reject null hypothesis. Data is now stationary.
+This test of the differentiated time series (ny_diff) has test_statistic output of -4.648 < -1.95 (5 pct) critical value.
+Therefore: Reject null hypothesis. Data is now stationary.
 
 
 # ACF and PACF plot - Identify model
@@ -104,8 +104,9 @@ par(mfrow = c(1, 1))  # reset layout
 ```
 
 Based on the ACF and PACF plots, 
-it is noticeable clear short-term and seasonal patterns — a spike at lag 12 
-pointed to a seasonal effect, while the first few lags suggested both AR(1) and MA(1) behavior —so we chose the SARIMA(1,1,1)(0,1,1)[12] model to capture these patterns effectively.
+it has a noticeable and clear short-term and seasonal pattern — a spike at lag 12 
+pointed to a seasonal effect, while the first few lags suggested both AR(1) and MA(1) behavior —so we chose the 
+SARIMA(1,1,1)(0,1,1)[12] model to capture these patterns effectively.
 
 # create the SARIMA model
 
