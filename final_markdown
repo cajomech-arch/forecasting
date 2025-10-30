@@ -24,11 +24,8 @@ making it academically and contextually valuable for forecasting research.
 # Import Libraries and data
 
 library(fpp3)
-library(forecast)
 library(tseries)
 library(urca)
-library(feasts)
-install.packages("knitr")
 library(knitr)
 
 
@@ -165,17 +162,7 @@ bind_rows(res1, res2, res3, res4)
 
 # Check accuracy measures
 
-We will check the accuracy measures and select a model:
-
-```{r forecast, echo=FALSE, message=FALSE, warning=FALSE}
-
-ny_fit %>%
-  forecast(h = 7) %>% 
-  accuracy(ny_df) %>%
-  kable()
-```
-
-Then, we plot it!
+We will check the accuracy measures and select a model and then plot it. 
 
 ```{r forecastplot, message=FALSE, warning=FALSE}
 
