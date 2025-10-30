@@ -56,6 +56,13 @@ The third step is identify the SARIMA model orders through the assessment of the
 ny_ts_diff <- diff(diff(ny_ts, lag = 12))
 
 # Plot ACF and PACF
+# Based on the ACF and PACF plots, 
+# it is  noticeable clear short-term and seasonal patterns — a spike at lag 12 
+# pointed to a seasonal effect, while the first few lags suggested both AR(1) and MA(1) behavior — so 
+# we chose the SARIMA(1,0,1)(1,1,1)[12] model to capture these patterns effectively.
+
+
+
 par(mfrow = c(1, 2))  # show both plots side by side
 acf(ny_ts_diff, main = "ACF of Differenced Series")
 pacf(ny_ts_diff, main = "PACF of Differenced Series")
