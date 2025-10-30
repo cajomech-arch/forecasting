@@ -58,8 +58,7 @@ plot(ny_ts,
 ```{r stationarity, echo=FALSE, eval=FALSE, message=FALSE, warning=FALSE}
 summary(ur.df(US_City_Temp_Data$new_york,
               type='none', lags=20))
-
-#the series is not stationery,the p-value>0.05..We apply the first difference
+#Since its not stationary apply first difference
 
 ny_diff <- diff(ny_ts,lag =12)
 
@@ -67,11 +66,13 @@ autoplot(ny_diff)
 
 summary(ur.df(na.omit(difference(US_City_Temp_Data$new_york,12)),
               type='none', lags=20))
-#This test of ny_diff has test_statistic output of -4.648 < -1.95 (5 pct) therefore
-#Reject null hypothesis. Data is stationary
 
 
 ``` 
+
+This test of ny_diff has test_statistic output of -4.648 < -1.95 (5 pct) therefore
+Reject null hypothesis. Data is stationary
+
 
 # ACF and PACF plot - Identify model
 
@@ -82,13 +83,6 @@ The third step is identify the SARIMA model orders through the assessment of the
 ny_ts_diff <- diff(diff(ny_ts, lag = 12))
 
 # Plot ACF and PACF
-# Based on the ACF and PACF plots, 
-# it is  noticeable clear short-term and seasonal patterns — a spike at lag 12 
-# pointed to a seasonal effect, while the first few lags suggested both AR(1) and MA(1) behavior — so 
-# we chose the SARIMA(1,0,1)(1,1,1)[12] model to capture these patterns effectively.
-
-
-
 par(mfrow = c(1, 2))  # show both plots side by side
 acf(ny_ts_diff, main = "ACF of Differenced Series")
 pacf(ny_ts_diff, main = "PACF of Differenced Series")
@@ -98,6 +92,8 @@ par(mfrow = c(1, 1))  # reset layout
 
 # create the SARIMA model
 
+```{r estimation, echo=FALSE, message=FALSE, warning=FALSE}
+
 tsMod <- Arima(ny_ts, order = c(1,0,1), seasonal = c(1,1,1))
 
 print(tsMod)
@@ -106,8 +102,9 @@ forecast(tsMod, h = 12)
 autoplot(forecast(tsMod, h = 12))
 
 ny_df <- as_tsibble(ny_ts) 
-# if this doesn't work, do this instead:
-# ny_df <- tsibble(value = as.numeric(ny_ts), index = yearmonth(seq(from = as.Date("1990-01-01"), by = "month", length.out = length(ny_ts))))
+
+
+```
 
 # Fit and compare multiple ARIMA models
 
@@ -190,5 +187,3 @@ ny_fit %>%
   autoplot(ny_df) 
 
 ```
-
-
