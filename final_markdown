@@ -51,6 +51,9 @@ autoplot(ny_ts,
 
 ```
 
+Here we can see the chunk of data that we will be working with. The mean remains 
+constant throughout the time frame period, with no significant changes in the
+variance and a visible seasonality. 
 
 # Stationarity: check with a UR test for stationarity
 
@@ -69,8 +72,14 @@ summary(ur.df(na.omit(diff(ny_ts,lag =12)),
 
 ``` 
 
-This test of ny_diff has test_statistic output of -4.648 < -1.95 (5 pct) therefore
-Reject null hypothesis. Data is stationary
+The UR test of the original data set has test_statistic output of -0.2426 > -1.95 
+(5 pct) critical value. Therefore:
+Accept null hypothesis. Original data set is NOT stationary.
+
+We apply the first difference and store it as a new time series (ny_diff)
+
+This test of the differentiated time series (ny_diff) has test_statistic output of -4.648 < -1.95 (5 pct) critical value. Therefore:
+Reject null hypothesis. Data is now stationary.
 
 
 # ACF and PACF plot - Identify model
@@ -90,19 +99,16 @@ par(mfrow = c(1, 1))  # reset layout
 ```
 
 Based on the ACF and PACF plots, 
-it is  noticeable clear short-term and seasonal patterns — a spike at lag 12 
-pointed to a seasonal effect, while the first few lags suggested both AR(1) and MA(1) behavior —so we chose the SARIMA(1,0,1)(1,1,1)[12] model to capture these patterns effectively.
+it is noticeable clear short-term and seasonal patterns — a spike at lag 12 
+pointed to a seasonal effect, while the first few lags suggested both AR(1) and MA(1) behavior —so we chose the SARIMA(1,1,1)(0,1,1)[12] model to capture these patterns effectively.
 
 # create the SARIMA model
 
 ```{r estimation, echo=FALSE, message=FALSE, warning=FALSE}
 
-tsMod <- Arima(ny_ts, order = c(1,0,1), seasonal = c(1,1,1))
+tsMod <- Arima(ny_ts, order = c(1,1,1), seasonal = c(0,1,1))
 
 print(tsMod)
-
-forecast(tsMod, h = 12)
-autoplot(forecast(tsMod, h = 12))
 
 ny_df <- as_tsibble(ny_ts) 
 
@@ -124,6 +130,9 @@ ny_models <- ny_df %>%
   print(ny_models)
 ```
 
+The model estimations show that the SARIMA(1,1,1)(0,1,1)[12] hast the smallest BIC value,
+indicating that the model has fit the data properly with a lower level of complexity. 
+
 
 ```{r residuals, echo=FALSE, message=FALSE, warning=FALSE}
 ny_fit <- ny_df %>%
@@ -140,6 +149,15 @@ ny_fit %>%
   gg_tsresiduals()
 ```
 
+The innovation residuals plot show us that they fluctuate randomly around zero,
+without trend. 
+
+The ACF plot shows that the residuals stay within the significance level of 95% of 
+no autocorrelation. Only some spikes around lag 12 and 24, which are indicative of
+seasonal data.
+
+The histogram show the residuals are approximately normally distributed, with a
+slight skewness to the right. 
 
 
 ```{r residuals_test, echo=FALSE, message=FALSE, warning=FALSE}
@@ -161,6 +179,11 @@ res4 <- augment(ny_fit) %>%
 
 bind_rows(res1, res2, res3, res4)
 ```
+
+The p-value statistic for the chosen model SARIMA(1,1,1)(0,1,1)[12] shows a 0.2073 > 0.05,
+implying that the result is ststistically insignificant, therefore accepting the null
+hypothesis which means the data is stationary. 
+
 
 # Check accuracy measures
 
