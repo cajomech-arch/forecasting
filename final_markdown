@@ -61,7 +61,7 @@ ny_diff <- diff(ny_ts,lag =12)
 
 autoplot(ny_diff)
 
-summary(ur.df(na.omit(difference(US_City_Temp_Data$new_york,12)),
+summary(ur.df(na.omit(diff(ny_ts,lag =12)),
               type='none', lags=20))
 
 
