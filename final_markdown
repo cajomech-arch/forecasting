@@ -1,5 +1,5 @@
 ---
-Title: "Forecasting Mean Monthly Temperature in New York"
+Title: "Forecasting Mean Monthly Temperature in New York City"
 Authors: "Pratul Paudel(20250085), Camilo Echeverria (20250082), Varsenik Hakobyan (20250041), Mariam Abolade Bisi (20251165)"
 Date: "`r Sys.Date()`"
 Output: html_document
