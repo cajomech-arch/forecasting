@@ -1,6 +1,6 @@
 ---
 Title: "Forecasting Mean Monthly Temperature in New York"
-Authors: "Pratul Paudel(20250085), Camilo Echeverria (20250082), Varsenik Hakobyan (20250041), Mariam Abolade Bisi"
+Authors: "Pratul Paudel(20250085), Camilo Echeverria (20250082), Varsenik Hakobyan (20250041), Mariam Abolade Bisi (20251165)"
 Date: "`r Sys.Date()`"
 Output: html_document
 ---
@@ -19,6 +19,11 @@ Therefore, we believe that analyzing and predicting temperature patterns support
 the evaluation of different forecasting models 
 but also provides insights with practical and economic implications, 
 making it academically and contextually valuable for forecasting research.
+
+With this forecasted data, we can now properly estimate the future average monthly 
+temperature for New York City, giving us a comprehensive scenario of the future temperature
+patterns with better accuracy. This forecast has multiple applications for those
+affected by these measurements. 
 
 # Import Libraries and setup data
 
@@ -196,3 +201,21 @@ ny_fit %>%
   autoplot(ny_df) 
 
 ```
+
+From the accuracy results, we can see that all of our models represent similar metrics. 
+Looking at the MASE, we can see our chosen model SARIMA(1,1,1)(0,1,1)[12] has a MASE < 1,
+so it means the series will continue as it, is with no trend or seasonality adjustments.
+
+The RMSE also indicates all models are very similar in how far the predictive values are
+from the actual values. 
+
+# Conclusion
+
+Applying the Box Jenkins methodology, we attempted to arrive using an accurate predictive model 
+,which in our case was the SARIMA model. From identifying trend and seasonality, making the data 
+stationary,
+then applying the estimation techniques, and finally forecasting, we can see that the model
+we chose based on our initial diagnostic of the ACF and PACF functions, SARIMA(1,1,1)(0,1,1)[12],
+seems to give us an accurate fit to our forecasting goals. As we can see in our forecasted plot,
+there is at the 95% significant level, that the data remains consistent to its historic values
+and pattern. 
