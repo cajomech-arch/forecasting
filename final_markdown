@@ -90,6 +90,10 @@ par(mfrow = c(1, 1))  # reset layout
 
 ```
 
+Based on the ACF and PACF plots, 
+it is  noticeable clear short-term and seasonal patterns — a spike at lag 12 
+pointed to a seasonal effect, while the first few lags suggested both AR(1) and MA(1) behavior —so we chose the SARIMA(1,0,1)(1,1,1)[12] model to capture these patterns effectively.
+
 # create the SARIMA model
 
 ```{r estimation, echo=FALSE, message=FALSE, warning=FALSE}
@@ -102,7 +106,6 @@ forecast(tsMod, h = 12)
 autoplot(forecast(tsMod, h = 12))
 
 ny_df <- as_tsibble(ny_ts) 
-
 
 ```
 
