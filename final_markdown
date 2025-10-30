@@ -120,7 +120,6 @@ ny_df <- as_tsibble(ny_ts)
 ny_models <- ny_df %>% 
   model(
     arima111011 = ARIMA(value ~ pdq(1,1,1) + PDQ(0,1,1)),
-    arima101111 = ARIMA(value ~ pdq(1,0,1) + PDQ(1,1,1)),
     arima111111 = ARIMA(value ~ pdq(1,1,1) + PDQ(1,1,1)),
     arima211111 = ARIMA(value ~ pdq(2,1,1) + PDQ(1,1,1)),
     auto = ARIMA(value)
@@ -138,7 +137,6 @@ indicating that the model has fit the data properly with a lower level of comple
 ny_fit <- ny_df %>%
   model(
     arima111011 = ARIMA(value ~ pdq(1,1,1) + PDQ(0,1,1)),
-    arima101111 = ARIMA(value ~ pdq(1,0,1) + PDQ(1,1,1)),
     arima111111 = ARIMA(value ~ pdq(1,1,1) + PDQ(1,1,1)),
     arima211111 = ARIMA(value ~ pdq(2,1,1) + PDQ(1,1,1)),
     auto = ARIMA(value)
@@ -166,23 +164,20 @@ res1 <- augment(ny_fit) %>%
   features(.innov, ljung_box, lag = 11, dof = 3)
 
 res2 <- augment(ny_fit) %>% 
-  filter(.model == 'arima101111') %>% 
-  features(.innov, ljung_box, lag = 11, dof = 4)
-
-res3 <- augment(ny_fit) %>% 
   filter(.model == 'arima111111') %>% 
   features(.innov, ljung_box, lag = 11, dof = 4)
 
-res4 <- augment(ny_fit) %>% 
+res3 <- augment(ny_fit) %>% 
   filter(.model == 'arima211111') %>% 
   features(.innov, ljung_box, lag = 11, dof = 5)
 
-bind_rows(res1, res2, res3, res4)
+bind_rows(res1, res2, res3)
 ```
 
-The p-value statistic for the chosen model SARIMA(1,1,1)(0,1,1)[12] shows a 0.2073 > 0.05,
-implying that the result is ststistically insignificant, therefore accepting the null
-hypothesis which means the data is stationary. 
+In the Ljung Box test, the p-value statistic for the chosen model SARIMA(1,1,1)(0,1,1)[12] shows a p-value of 0.2073 > 0.05.
+Therefore, we reject the null hypothesis, concluding there is no significant autocorrelation among its residuals.
+This implies the residuals look approximately like white noise.
+This also supports that the model is adequate. 
 
 
 # Check accuracy measures
@@ -191,9 +186,8 @@ We will check the accuracy measures and select a model and then plot it.
 
 ```{r forecastplot, message=FALSE, warning=FALSE}
 
-ny_fit %>%
-  forecast(h = 12) %>% 
-  accuracy(ny_df) %>%
+ny_fit %>% 
+  accuracy() %>%
   kable()
 
 ny_fit %>%
