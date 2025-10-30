@@ -1,6 +1,6 @@
 ---
 Title: "Forecasting Mean Monthly Temperature in New York"
-Authors: "Pratul Paudel, Camillo Echeverria, Varsenik Hakobyan, Mariam Abolade Bisiriyu"
+Authors: "Pratul Paudel(20250085), Camillo Echeverria, Varsenik Hakobyan (20250041), Mariam Abolade Bisiriyu"
 Date: "`r Sys.Date()`"
 Output: html_document
 ---
