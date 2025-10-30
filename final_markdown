@@ -143,11 +143,11 @@ ny_fit %>%
 ```{r residuals_test, echo=FALSE, message=FALSE, warning=FALSE}
 res1 <- augment(ny_fit) %>% 
   filter(.model == 'arima111011') %>% 
-  features(.innov, ljung_box, lag = 11, dof = 1)
+  features(.innov, ljung_box, lag = 11, dof = 3)
 
 res2 <- augment(ny_fit) %>% 
   filter(.model == 'arima101111') %>% 
-  features(.innov, ljung_box, lag = 12, dof = 1)
+  features(.innov, ljung_box, lag = 12, dof = 4)
 
 res3 <- augment(ny_fit) %>% 
   filter(.model == 'arima111111') %>% 
