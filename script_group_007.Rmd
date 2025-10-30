@@ -1,6 +1,6 @@
 ---
-Title: "Forecasting Mean Monthly Temperature in New York"
-Authors: "Pratul Paudel, Camillo Echeverria, Varsenik Hakobyan, Mariam Abolade Bisiriyu"
+Title: "Forecasting Mean Monthly Temperature in New York City"
+Authors: "Pratul Paudel(20250085), Camilo Echeverria (20250082), Varsenik Hakobyan (20250041), Mariam Abolade Bisi (20251165)"
 Date: "`r Sys.Date()`"
 Output: html_document
 ---
@@ -20,11 +20,203 @@ the evaluation of different forecasting models
 but also provides insights with practical and economic implications, 
 making it academically and contextually valuable for forecasting research.
 
-```{r setup, include=FALSE}
-# Load necessary libraries
-knitr::opts_chunk$set(echo = TRUE)
+With this forecasted data, we can now properly estimate the future average monthly 
+temperature for New York City, giving us a comprehensive scenario of the future temperature
+patterns with better accuracy. This forecast has multiple applications for those
+affected by these measurements. 
+
+# Import Libraries and setup data
+
+```{r setup,  echo=FALSE, eval=FALSE, message=FALSE, warning=FALSE}
+
 library(fpp3)
-library(forecast)
 library(tseries)
 library(urca)
-library(kableExtra)
+library(knitr)
+
+
+## Convert time column to Date format and filter from 1990 onward
+US_City_Temp_Data$time <- as.Date(US_City_Temp_Data$time)
+US_City_Temp_Data <- US_City_Temp_Data[US_City_Temp_Data$time >= as.Date("1990-01-01"), ]
+
+## Extract New York temperature data
+ny_temp <- US_City_Temp_Data$new_york
+
+## Create time series object
+## Monthly data from January 1990 to December 2022
+ny_ts <- ts(ny_temp, 
+            start = c(1990, 1), 
+            frequency = 12)
+
+## Plot the time series
+autoplot(ny_ts, 
+     main = "Monthly Average Temperature - New York",
+     xlab = "Year", 
+     ylab = "Temperature")
+
+```
+
+Here we can see the chunk of data that we will be working with. The mean remains 
+constant throughout the time frame period, with no significant changes in the
+variance and a visible seasonality. 
+
+# Stationarity: check with a UR test for stationarity
+
+```{r stationarity, echo=FALSE, eval=FALSE, message=FALSE, warning=FALSE}
+summary(ur.df(US_City_Temp_Data$new_york,
+              type='none', lags=20))
+#Since its not stationary apply first difference
+
+ny_diff <- diff(ny_ts,lag =12)
+
+autoplot(ny_diff)
+
+summary(ur.df(na.omit(diff(ny_ts,lag =12)),
+              type='none', lags=20))
+
+
+``` 
+
+The UR test of the original data set has test_statistic output of -0.2426 > -1.95 
+(5 pct) critical value. Therefore:
+Accept null hypothesis. Original data set is NOT stationary.
+
+We apply the first difference and store it as a new time series (ny_diff)
+
+This test of the differentiated time series (ny_diff) has test_statistic output of -4.648 < -1.95 (5 pct) critical value.
+Therefore: Reject null hypothesis. Data is now stationary.
+
+
+# ACF and PACF plot - Identify model
+
+The third step is identify the SARIMA model orders through the assessment of the ACF and PACF.
+
+```{r acf_pacf, echo=TRUE, message=FALSE, warning=FALSE}
+# Seasonal + first differencing
+ny_ts_diff <- diff(diff(ny_ts, lag = 12))
+
+# Plot ACF and PACF
+par(mfrow = c(1, 2))  # show both plots side by side
+acf(ny_ts_diff, main = "ACF of Differenced Series")
+pacf(ny_ts_diff, main = "PACF of Differenced Series")
+par(mfrow = c(1, 1))  # reset layout
+
+```
+
+Based on the ACF and PACF plots, 
+it has a noticeable and clear short-term and seasonal pattern — a spike at lag 12 
+pointed to a seasonal effect, while the first few lags suggested both AR(1) and MA(1) behavior —so we chose the 
+SARIMA(1,1,1)(0,1,1)[12] model to capture these patterns effectively.
+
+# create the SARIMA model
+
+```{r estimation, echo=FALSE, message=FALSE, warning=FALSE}
+
+tsMod <- Arima(ny_ts, order = c(1,1,1), seasonal = c(0,1,1))
+
+print(tsMod)
+
+ny_df <- as_tsibble(ny_ts) 
+
+```
+
+# Fit and compare multiple ARIMA models
+
+```{r estimation, echo=FALSE, message=FALSE, warning=FALSE}
+ny_models <- ny_df %>% 
+  model(
+    arima111011 = ARIMA(value ~ pdq(1,1,1) + PDQ(0,1,1)),
+    arima111111 = ARIMA(value ~ pdq(1,1,1) + PDQ(1,1,1)),
+    arima211111 = ARIMA(value ~ pdq(2,1,1) + PDQ(1,1,1)),
+    auto = ARIMA(value)
+  ) %>%
+  glance() %>%
+  select(Model = .model, AICc, AIC, BIC)
+  print(ny_models)
+```
+
+The model estimations show that the SARIMA(1,1,1)(0,1,1)[12] hast the smallest BIC value,
+indicating that the model has fit the data properly with a lower level of complexity. 
+
+
+```{r residuals, echo=FALSE, message=FALSE, warning=FALSE}
+ny_fit <- ny_df %>%
+  model(
+    arima111011 = ARIMA(value ~ pdq(1,1,1) + PDQ(0,1,1)),
+    arima111111 = ARIMA(value ~ pdq(1,1,1) + PDQ(1,1,1)),
+    arima211111 = ARIMA(value ~ pdq(2,1,1) + PDQ(1,1,1)),
+    auto = ARIMA(value)
+  )
+
+ny_fit %>%
+  select(arima111011) %>%
+  gg_tsresiduals()
+```
+
+The innovation residuals plot show us that they fluctuate randomly around zero,
+without trend. 
+
+The ACF plot shows that the residuals stay within the significance level of 95% of 
+no autocorrelation. Only some spikes around lag 12 and 24, which are indicative of
+seasonal data.
+
+The histogram show the residuals are approximately normally distributed, with a
+slight skewness to the right. 
+
+
+```{r residuals_test, echo=FALSE, message=FALSE, warning=FALSE}
+res1 <- augment(ny_fit) %>% 
+  filter(.model == 'arima111011') %>% 
+  features(.innov, ljung_box, lag = 11, dof = 3)
+
+res2 <- augment(ny_fit) %>% 
+  filter(.model == 'arima111111') %>% 
+  features(.innov, ljung_box, lag = 11, dof = 4)
+
+res3 <- augment(ny_fit) %>% 
+  filter(.model == 'arima211111') %>% 
+  features(.innov, ljung_box, lag = 11, dof = 5)
+
+bind_rows(res1, res2, res3)
+```
+
+In the Ljung Box test, the p-value statistic for the chosen model SARIMA(1,1,1)(0,1,1)[12] shows a p-value of 0.2073 > 0.05.
+Therefore, we reject the null hypothesis, concluding there is no significant autocorrelation among its residuals.
+This implies the residuals look approximately like white noise.
+This also supports that the model is adequate. 
+
+
+# Check accuracy measures
+
+We will check the accuracy measures and select a model and then plot it. 
+
+```{r forecastplot, message=FALSE, warning=FALSE}
+
+ny_fit %>% 
+  accuracy() %>%
+  kable()
+
+ny_fit %>%
+  forecast(h = 12) %>% 
+  filter(.model == 'arima111011') %>% 
+  autoplot(ny_df) 
+
+```
+
+From the accuracy results, we can see that all of our models represent similar metrics. 
+Looking at the MASE, we can see our chosen model SARIMA(1,1,1)(0,1,1)[12] has a MASE < 1,
+so it means the series will continue as it, is with no trend or seasonality adjustments.
+
+The RMSE also indicates all models are very similar in how far the predictive values are
+from the actual values. 
+
+# Conclusion
+
+Applying the Box Jenkins methodology, we attempted to arrive using an accurate predictive model 
+,which in our case was the SARIMA model. From identifying trend and seasonality, making the data 
+stationary,
+then applying the estimation techniques, and finally forecasting, we can see that the model
+we chose based on our initial diagnostic of the ACF and PACF functions, SARIMA(1,1,1)(0,1,1)[12],
+seems to give us an accurate fit to our forecasting goals. As we can see in our forecasted plot,
+there is at the 95% significant level, that the data remains consistent to its historic values
+and pattern. 
