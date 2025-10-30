@@ -1,6 +1,6 @@
 ---
 Title: "Forecasting Mean Monthly Temperature in New York"
-Authors: "Pratul Paudel(20250085), Camilo Echeverria (20250082), Varsenik Hakobyan (20250041), Mariam Abolade Bisiriyu"
+Authors: "Pratul Paudel(20250085), Camilo Echeverria (20250082), Varsenik Hakobyan (20250041), Mariam Abolade Bisi"
 Date: "`r Sys.Date()`"
 Output: html_document
 ---
@@ -20,8 +20,9 @@ the evaluation of different forecasting models
 but also provides insights with practical and economic implications, 
 making it academically and contextually valuable for forecasting research.
 
-```{r setup, include=FALSE}
-# Import Libraries and data
+# Import Libraries and setup data
+
+```{r setup,  echo=FALSE, eval=FALSE, message=FALSE, warning=FALSE}
 
 library(fpp3)
 library(tseries)
@@ -43,10 +44,11 @@ ny_ts <- ts(ny_temp,
             frequency = 12)
 
 ## Plot the time series
-plot(ny_ts, 
+autoplot(ny_ts, 
      main = "Monthly Average Temperature - New York",
      xlab = "Year", 
      ylab = "Temperature")
+
 ```
 
 
@@ -147,7 +149,7 @@ res1 <- augment(ny_fit) %>%
 
 res2 <- augment(ny_fit) %>% 
   filter(.model == 'arima101111') %>% 
-  features(.innov, ljung_box, lag = 12, dof = 4)
+  features(.innov, ljung_box, lag = 11, dof = 4)
 
 res3 <- augment(ny_fit) %>% 
   filter(.model == 'arima111111') %>% 
