@@ -17,11 +17,12 @@ as temperature variations significantly influence energy demand,
 transportation, and urban planning. 
 Therefore, we believe that analyzing and predicting temperature patterns supports 
 the evaluation of different forecasting models 
-but also provides insights with practical and economic implications, 
+and also provides insights into practical and economic implications, 
 making it academically and contextually valuable for forecasting research.
 
 With this forecasted data, we can now properly estimate the future average monthly 
-temperature for New York City, giving us a comprehensive scenario of the future temperature
+temperature for New York City in the next 12 months,
+giving us a comprehensive scenario of the future temperature
 patterns with better accuracy. This forecast has multiple applications for those
 affected by these measurements. 
 
@@ -220,3 +221,4 @@ we chose based on our initial diagnostic of the ACF and PACF functions, SARIMA(1
 seems to give us an accurate fit to our forecasting goals. As we can see in our forecasted plot,
 there is at the 95% significant level, that the data remains consistent to its historic values
 and pattern. 
+
