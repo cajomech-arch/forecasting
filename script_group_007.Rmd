@@ -216,8 +216,11 @@ from the actual values.
 In our attempt to derive an accurate predictive model, we applied the Box Jenkins methodology.  
 The model we used which was most relevant to us was the SARIMA model. 
 After identifying the trend and seasonality, transforming the data to stationarity, 
-estimating the parameters, and generating the forecasts, the SARIMA(1,1,1)(0,1,1)[12] model which was selected based on the initial ACF and PACF diagnostics, appears to provide a strong fit. 
-The forecast plot shows that, with 95% confidence, the predicted values remain consistent with the historical pattern and variability. 
+estimating the parameters, and generating the forecasts, the SARIMA(1,1,1)(0,1,1)[12] model 
+which was selected based on the initial ACF and PACF diagnostics, appears to provide a strong fit. 
+The forecast plot shows that, with 95% confidence, the predicted values remain consistent with the
+historical pattern and variability. 
+
 
 
 
