@@ -20,7 +20,7 @@ the evaluation of different forecasting models
 and also provides insights into practical and economic implications, 
 making it academically and contextually valuable for forecasting research.
 
-With this forecasted data, we can now properly estimate the future average monthly 
+With this forecasted data, we expect to properly estimate the future average monthly 
 temperature for New York City in the next 12 months,
 giving us a comprehensive scenario of the future temperature
 patterns with better accuracy. This forecast has multiple applications for those
@@ -220,6 +220,7 @@ estimating the parameters, and generating the forecasts, the SARIMA(1,1,1)(0,1,1
 which was selected based on the initial ACF and PACF diagnostics, appears to provide a strong fit. 
 The forecast plot shows that, with 95% confidence, the predicted values remain consistent with the
 historical pattern and variability. 
+
 
 
 
